@@ -22,6 +22,8 @@ if __name__ == "__main__":
         "Authorization" : "Bearer {token}".format(token=TOKEN)
     }
     
+    # trying to see the changes
+    
     # Convert time to Unix timestamp in miliseconds      
     today = datetime.datetime.now()
     yesterday = today - datetime.timedelta(days=1)
