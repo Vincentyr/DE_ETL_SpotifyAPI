@@ -2,13 +2,28 @@ import requests
 from datetime import datetime
 import yfinance as yf
 import pandas as pd
+import numpy as np
 
 class stock_analysis(object):
     
     def __init__(self, tickers : str) -> None:
         self.tickers = tickers
 
+    def stock_div(self):
+        div = []
+        for i in range(0, len(self.tickers)):
+            new_row = []
+            data = yf.Ticker(str(self.tickers[i]))
+            dividend = data.actions
+            new_row.insert(0, {"Dividends" : str(self.tickers[i]), "Stock Splits" : None})
+            div.append(pd.concat([pd.DataFrame(new_row), dividend], ignore_index=False))
+        
+        div_compiled = pd.concat(div)
+        div_compiled.to_csv("C:/Users/SIT/Documents/Github/Ironman/DataEngineering_ETL/dividends.csv", index=True)
+        return div_compiled
+
     def stats_table(self) -> None:
+        
         stats = []
 
         def key_stats(website) -> None:
@@ -29,6 +44,6 @@ class stock_analysis(object):
         return result
 
 display = stock_analysis(['AAPL', 'AMZN', 'BLK', 'T', 'TSLA'])
-print(display.stats_table())
+print(display.stock_div())
 
 
