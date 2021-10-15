@@ -19,7 +19,8 @@ class stock_analysis(object):
             div.append(pd.concat([pd.DataFrame(new_row), dividend], ignore_index=False))
         
         div_compiled = pd.concat(div)
-        div_compiled.to_csv("C:/Users/SIT/Documents/Github/Ironman/DataEngineering_ETL/dividends.csv", index=True)
+        # insert file path
+        div_compiled.to_csv("C:.../dividends.csv", index=True)
         return div_compiled
 
     def stats_table(self) -> None:
