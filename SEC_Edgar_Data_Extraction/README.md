@@ -4,7 +4,7 @@ This is a Data pipeline that aimed to extract SEC Edgar data using the API and a
 
 ## First Step - Web Scraping to Extract the Annual Report URL
 
-Referring to edgar.py, we have automate the extraction of the Financial Report.xslx document into our local machine of a single company. By changing the company name and year variable at the start of the script, we can easily download the files into our local machine for processing in BI tools (e.g. Tabelau / powerBI)
+Referring to edgar.py, we have automate the extraction of the Financial Report.xslx document into our local machine of a single company. By changing the company name and year variable at the start of the script, we can easily download the files into our local machine for processing in BI tools (e.g. Tabelau / powerBI). You may refer to the sample - MICROSOFT_CORP where we have extracted microsoft annual report for 2018-21
 
 ## Second Step - Data Transform of the data within the excel
 
