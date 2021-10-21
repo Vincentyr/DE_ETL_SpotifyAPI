@@ -1,31 +1,43 @@
-import bs4 as bs 
 import requests
 import pandas as pd
 import os
 
 # inputs - Look up the company name in https://www.sec.gov/edgar/searchedgar/companysearch.html
 # the company name have to be exact in cap and special charactor such as "."
-company = ["MICROSOFT CORP", "Facebook Inc", "Palantir Technologies Inc."]
-year = ['2018','2019','2020','2021']
+company = ["Facebook Inc"]
+# input the latest year you want it to be
+latestyear = 2021
+# the no. of year you want to backdate
+yearstobackdate = 10
+year = sorted([latestyear-x for x in range(yearstobackdate)])
+# year = ['2015','2016','2017','2018','2019','2020','2021']
+# writing files into local machine and change to your own directory
+base_path = 'C:/Users/Yong Ren/Documents/Investment/Database/SEC_Edgar_Data_Extraction/SEC_Edgar_Data_Extraction' 
 
 # fixed variable
 quarter = ['QTR1','QTR2','QTR3','QTR4']
 base_url = r"https://www.sec.gov/Archives/"
-headers = {'User-Agent' : 'Mozilla/5.0'} # declare the user agent which is necessary to grant the right to using requests.get()
+headers = {'User-Agent' : 'Mozilla/5.0'} # declare the user agent which is necessary to grant the right to using requests.get(), see SEC edgar documentation
 
-# empty list for storing the data
+# empty list for storing the master.idx data
 fulldata = []
-# we will extract all the data from QTR 1-4 in master.idx so we can the specific filing for the entire year
+# we will extract all the data from QTR 1-4 in master.idx as they are not file accordingly to years
 for years in year:
     for qtr in quarter:
-        # download
-        index = requests.get(f'https://www.sec.gov/Archives/edgar/full-index/{years}/{qtr}/master.idx', headers=headers).content
-        data = index.decode('utf-8')
+        # unicode error have appear for some of the files, so we will skip those files
+        try:
+            # download
+            index = requests.get(f'https://www.sec.gov/Archives/edgar/full-index/{years}/{qtr}/master.idx', headers=headers).content
+            # NOTE! UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc3 in position 8510740: invalid continuation byte. perhaps do an exceptionerror line to avoid corrupted files
+            data = index.decode('utf-8')
+        except UnicodeDecodeError:
+            print("UnicodeDecodeError, " + str(years) + str(qtr) + " file is not downloaded")
         newdata = data.split("\n")
+        # through manual interpretation of master.idx file downloaded to determine the slicing but the rows headers that we slice off is standardise throughout all files
         newdata = newdata[11:]
         for item in newdata:
             fulldata.append(item.split("|"))
-        print("Dowload done for " + years + qtr)
+        print("Dowload done for " + str(years) + qtr)
 
 # we will loop through all the company 
 for companies in company:
@@ -45,10 +57,8 @@ for companies in company:
         newnewc = newc[0].replace(".txt", "")
         new_url.append(base_url+newnewc+"/Financial_Report.xlsx")
     
-    # writing files into local machine
-    base_path = 'C:/Users/Yong Ren/Documents/Investment/Database/SEC_Edgar_Data_Extraction/SEC_Edgar_Data_Extraction' #<-change to your own directory
     current_dir = os.listdir(path=base_path)
-    # TO NOTE! we have to replace the "." in order to avoid creating a mess in filenaming convention. If you try to add a "." to window file directory, it will directly be omitted, and when you download files again, the directory is not able to match the file name again
+    # we have to replace the "." in order to avoid creating a mess in filenaming convention. If you try to add a "." to window file directory, it will directly be omitted, and when you download files again, the directory is not able to match the file name
     companyname = companies.replace(" ", "_").replace(".","")
     if companyname not in current_dir:
         os.mkdir("/".join([base_path, companyname]))
@@ -63,7 +73,7 @@ for companies in company:
     file_dir = os.listdir(path=company_path)
 
     # finding the year for the finanical report to cater for newer company to use for our file naming
-    # since edgar start filling in 1994/1995, we will create a condition for it filter out those in 1990s
+    # since edgar start filling in 1994/1995, we need to beware of files created in 1990s
     firstyear = int(allof10_K[0].split("-")[1])
     if firstyear > 93:
         yearinfull = int(str(19)+str(firstyear))
@@ -80,4 +90,4 @@ for companies in company:
             with open(filename, "wb") as f:
                 f.write(r.content)
                 f.close()
-    print("All files downloaded")
+    print("All files downloaded for " + companies)
